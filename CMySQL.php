@@ -275,7 +275,8 @@
       // Jos yhdistäminen epäonnistui, heitetään exception
       if(! $ret )
       {
-        throw new Exception( 'Failed to connect database server!' );
+        throw new Exception( 'Failed to connect database server! Error: ' 
+			. mysql_error() );
       }
 
       // Jos onnistuttiin yhdistää kantaan
