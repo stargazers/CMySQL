@@ -22,7 +22,7 @@
   // ***********************************************  
   //  CMySQL
   /*!
-      @brief MySQL-luokan käsittelyyn tarkoitettu luokka
+      @brief Class for MySQL databases
 
       @author Aleksi Räsänen
               aleksi_rasanen@hotmail.com
@@ -31,40 +31,40 @@
   // ***********************************************  
   class CMySQL
   {
-    //! Tällä pidetään tietoa siitä onko yhteys kantaan auki vaiko ei
+    //! This will keep information if we are connected or not
     private $_isConnected = false;
 
-    //! Viimeisin kysely tallennetaan tähän
+    //! Last executed query
     private $_lastQuery = '';
 
-    //! Viimeisimmän kyselyn tulokset tallennetaan tähän
+    //! Results of last query
     private $_lastResult = '';
 
-    //! Yhteys 
+    //! Database connection
     private $_connection = '';
 
-    //! Viimeksi suoritetun INSERT-kyselyn palauttama ID
+    //! Last executed INSERT INTO -query insertion ID
     private $lastInsertID = '';
 
     
     //***************************************************  
     //  __construct
     /*!
-        @brief Luokan konstruktori. Jos annetaan parametrinä
-               tiedosto, luetaan tietokannan asetukset
-               siitä ja yhdistetään tietokantaan.
+	@brief Class constructor. If we give a file as a
+	       parameter, then we read configuration from
+	       that file and connect database directly.
 
-        @param $settingsFile Tietokannan asetukset. Asetukset pitää
-               olla assosiatiivisessa taulukossa $db, jossa on
-               keyt server, username, password, port ja database.
+	@param $settingsFile Database settings. All settings
+	       must be in associative array $db where must
+	       exists keys server, username, password, port
+	       and database.
 
-        @return Tietokantayhteys
+        @return Database connection
     */
     //***************************************************  
     public function __construct( $settingsFile = '' )
     {
-      // Jos asetustiedosto ollaan annettu ja se on olemassa,
-      // luetaan asetukset siitä ja yhdistetään tietokantaan.
+      // If config file is given and it exists, try to connect
       if( $settingsFile != '' && file_exists( $settingsFile ) )
       {
         include $settingsFile;
@@ -73,7 +73,7 @@
             $db['username'], $db['password'], $db['port'], 
             $db['database'] );
 
-        // Palautetaan tietokantayhteys
+        // Return created connection
         return $this->_connection;
       }
 
@@ -82,38 +82,37 @@
     // ***********************************************
     //  query
     /*!
-        @brief Suorittaa SQL-kyselyn
+        @brief Execute query
 
-        @param $query Kysely joka halutaan suorittaa
+        @param $query SQL query
 
-        @return Viimeisimmän haun tulokset. Jos tulee virhe,
-                heitetään Exception.
+        @return Last query results. On error we throw
+                an Exception.
     */
     // ***********************************************
     public function query( $query )
     {
-      // Yritetään suorittaa kysely vain jos on yhdistetty
+      // Execute query only if we have connected
       if( $this->_isConnected )
       {
-        // Tallennetaan viimeisin kysely luokan sisäiseen muuttujaan
+	// Save last query to class variable
         $this->_lastQuery = $query;
         
-        // Suoritetaan kysely
+        // Execute query
         $ret = @mysql_query( $query, $this->_connection );
 
-        // Jos jotain meni pieleen, heitetään exception
+        // If there were error, throw Exception
         if( mysql_error() != '' )
           throw new Exception( 'MySQL error: ' . mysql_error() );
 
-        // Tallennetaan kyselyn tulos luokan sisäiseen muuttujaan
+	// Save query results to class variable
         $this->_lastResult = $ret;
 
-        // Otetaan talteen viimeisimmästä INSERT-kyselystä saatu ID
+	// Get last insert ID
         $this->lastInsertID = mysql_insert_id();
 
-        // Palautetaan haun tulokset
+        // Return last query resultset
         return $ret;
-
       }
       else
       {
@@ -125,11 +124,12 @@
     // ***********************************************
     //  setConnection
     /*!
-        @brief Asettaa luokan tietokantayhteyden. Tätä
-               voidaan käyttää, jos ei haluta luoda
-               uutta yhteyttä, vaan käyttää vanhaa.
+	@brief Set connection. This can be used if
+	       we want to use already existing 
+	       database connection instead of creating
+	       new connection.
 
-        @param $connection Yhteys
+        @param $connection Database connection handle
     */
     // ***********************************************
     public function setConnection( $connection )
@@ -142,9 +142,9 @@
     // ***********************************************
     //  getConnection
     /*!
-        @brief Palauttaa tietokantayhteyden resurssin
+        @brief Return handle of a connection
 
-        @return Tietokantayhteys
+        @return Connection handle
     */
     // ***********************************************
     public function getConnection()
@@ -156,22 +156,20 @@
     // ***********************************************
     //  disconnect
     /*!
-        @brief Katkaisee yhteyden tietokantapalvelimeen
+        @brief Disconnects connection to database server
     */
     // ***********************************************
     public function disconnect()
     {
-      // Yritetään katkaista yhteys vain jos se on avoin
+      // Try to disconnect only if conncetion is open
       if( $this->_isConnected )
       {
         $ret = @mysql_close();
 
-        // Jos yhteyden katkaisu onnistui, päivitetään muuttujan tila
+        // If connection closed fine, update status
         if( $ret )
           $this->_isConnected = false;
       }
-
-      // Ei oltu yhdistetty
       else
       {
         throw new Exception( 'Can\'t disconnect because \
@@ -183,9 +181,9 @@
     // ***********************************************
     //  getLastQuery
     /*!
-        @brief Palauttaa viimeksi suoritetun SQL-kyselyn
+        @brief Return last executed query
 
-        @return Merkkijonona viimeisimmän kyselyn
+        @return Last executed query in string
     */
     // ***********************************************
     public function getLastQuery()
@@ -197,9 +195,9 @@
     // ***********************************************
     //  getLastResult
     /*!
-        @brief Palauttaa viimeksi suoritetun kyselyn tulokset
+        @brief Returns last resultset
 
-        @return MySQL resurssina viimeisimmän kyselyn tulokset
+        @return Results of last query in resultset
     */
     // ***********************************************
     public function getLastResult()
@@ -211,32 +209,32 @@
     // ***********************************************
     //  fetchAssoc
     /*!
-        @brief Tällä tehdään haun tuloksista assosiatiivitaulukko
+        @brief Create associative array from resultset
 
-        @param $db_ret query-funktion antama paluuarvo
+        @param $db_ret Resultset
 
-        @return Assosiatiivisen taulukon
+        @return Associative array
     */
     // ***********************************************
     public function fetchAssoc( $db_ret )
     {
-      // Lasketaan rivien määrä montako on tullut kyselyssä
+      // Get number of rows
       $numRows = @mysql_num_rows( $db_ret );
 
-      // Tähän taulukkoon tallennetaan paluuarvo
+      // Here we store results
       $assocArray = array();
 
-      // Luodaan haun tuloksista assosiatiivinen taulukko
+      // Create assoc array
       for( $i=0; $i < $numRows; $i++ )
       {
-        // Pilkotaan rivi assosiatiivitaulukoksi
+        // Split row to assoc array
         $row = mysql_fetch_assoc( $db_ret );
 
-        // ...ja lisätään se lopulliseen taulukkoon
+        // Add row to assoc array
         $assocArray[] = $row;
       }
 
-      // Palautetaan assosiatiivitaulukko
+      // Return assoc array
       return $assocArray;
 
     }
@@ -245,55 +243,49 @@
     // ***********************************************
     //  connect
     /*!
-        @brief Yhdistää tietokantapalvelimeen
+        @brief Connect to database server
 
-        @param $server Palvelin johon yhdistetään
+        @param $server Database server
 
-        @param $username Tietokannan käyttäjätunnus
+        @param $username Database username
 
-        @param $password Tietokannan käyttäjän salasana
+        @param $password Database password
 
-        @param [$port] Portti jota käytetään yhdistäessä
+        @param [$port] Database port number
 
-        @param [$database] Kanta joka valitaan yhdistämisen jälkeen
+        @param [$database] Database to select
 
-        @return Yhteys. Epäonnistuessaan heittää Exceptionin.
+        @return Connection. If failed, throws an Exception.
     */
     // ***********************************************
     public function connect( $server, $username, $password, $port = ''
       , $database = '' )
     {
-
-      // Jos halutaan yhdistää ilman porttia
       if( $port == '' )
         $ret = @mysql_connect( $server, $username, $password );
-
-      // Jos halutaan yhdistää portin kanssa
       else
         $ret = @mysql_connect( $server, $username, $password, $port );
 
-      // Jos yhdistäminen epäonnistui, heitetään exception
+      // If connection failed, throw new Exception
       if(! $ret )
       {
         throw new Exception( 'Failed to connect database server! Error: ' 
 			. mysql_error() );
       }
-
-      // Jos onnistuttiin yhdistää kantaan
       else
       {
-        // Kerrotaan että yhdistäminen on onnistunut
+        // Save status so we can know that we are connected
         $this->_isConnected = true;
 
-        // Jos haluttiin valita tietokanta samalla
+        // Select database if param $database was given
         if( $database != '' )
           $this->selectDatabase( $database );
 
-        // Pidetään yhteys tallessa
+        // Save database connection
         $this->_connection = $ret;
       }
 
-      // Palautetaan muodostettu yhteys
+      // Return created cnnection
       return $ret;
     }
 
@@ -301,16 +293,16 @@
     // ***********************************************
     //  selectDatabase
     /*!
-        @brief Valitsee käytettävän tietokannan
+        @brief Select database to use
 
-        @param $database Tietokanta joka valitaan
+        @param $database Database what we want to use
     */
     // ***********************************************
     public function selectDatabase( $database )
     {
       $ret = @mysql_select_db( $database );
 
-      // Jos tietokannan valinta epäonnistui
+      // If selection failed, throw new Exception
       if(! $ret )
       {
         throw new Exception( 'Failed to select database!' );
@@ -322,9 +314,9 @@
     // ***********************************************
     //  isConnected
     /*!
-        @brief Palauttaa tiedon onko yhdistettynä kantaan vaiko ei
+        @brief Tells if we are connected or not
 
-        @return True jos on yhdistetty, false jos ei.
+        @return True if connected, otherwise false
     */
     // ***********************************************  
     public function isConnected()
@@ -336,34 +328,32 @@
     // ***********************************************
     //  numRows
     /*!
-        @brief Lukee kyselyn rivien määrän
+        @brief Get number of rows in resultset
 
-        @param [$db_ret] Kyselyn tulokset josta halutaan rivimäärä
-               Jos tätä ei olla annettu, luetaan rivimäärä viimeksi
-               suoritetusta kyselyn tuloksesta jos sellainen löytyy.
-               Jos ei, heitetään exception. 
+	@param [$db_ret] Query results where we want
+	       to read number of rows. If this is not
+	       given, then we use local variable
+	       where is stored last query results.
+	       If that is not found, then we throw
+	       an Exception.
 
-        @return Rivimäärä
+        @return Number of rows
     */
     // ***********************************************  
     public function numRows( $db_ret = '' )
     {
-      // Jos parametrinä ollaan saatu kyselyn tulos, luetaan sen rivimäärä
       if( $db_ret != '' )
       {
         return @mysql_num_rows( $db_ret );
       }
-
-      /* Jos ei olla parametrinä saatu kyselyn tulosta, katsotaan onko
-         tehty jokin kysely jo tällä luokalla ja luetaan viimeisimmästä
-         hakutuloksesta montako riviä löytyi. */
       else
       {
-        // Jos on tehty kysely tällä luokalla
+	// If we have done query with this class,
+	// use last results.
         if( $this->_lastResult != '' )
           return @mysql_num_rows( $this->_lastResult );
 
-        // Ei mistään mistä lukea rivimääärää - heitetään exception
+        // No queries done - Throw an Exception.
         else
           throw new Exception( 'Give query return as a parameter!' );
       }
@@ -373,11 +363,12 @@
     // ***********************************************
     //  getLastInsertID
     /*!
-        @brief Palauttaa viimeisimmän INSERT-kyselyn 
-            antaman ID-arvon.
+        @brief Return last ID value of last INSERT
+	       INTO-query.
         
-        @return ID-numeron. 0, jos ei olla tehty tällä
-            yhteydellä yhtään INSERT-kyselyä.
+        @return ID-number. 0 if we have not created
+	        any INSERT INTO -queries with this
+		database connection.
     */
     // ***********************************************
     public function getLastInsertID()
