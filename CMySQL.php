@@ -375,6 +375,34 @@
     {
       return $this->lastInsertID;
     }
+
+	// ************************************************** 
+	//  queryAndAssoc
+	/*!
+		@brief Creates a SQL query and try to fetch
+		  results in the assoc array.
+		@param $query SQL Query
+		@return Array of values. If no rows, we return -1,
+		  if query failed, we return -2. Use 'query'
+		  to get more information about failed queries.
+	*/
+	// ************************************************** 
+	public function queryAndAssoc( $query )
+	{
+		try
+		{
+			$ret = $this->query( $query );
+
+			if( $this->numRows( $ret ) > 0 )
+				return $this->fetchAssoc( $ret );
+
+			return -1;
+		}
+		catch( Exception $e )
+		{
+			return -2;
+		}
+	}
   }
 
 ?>
