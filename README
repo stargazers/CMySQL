@@ -1,0 +1,21 @@
+CMySQL
+======
+
+	Description:
+		Database class for handling MySQL databases.
+	
+	License:
+		GNU AGPL
+	
+	Author:
+		Aleksi Räsänen, 2009-2011
+		aleksi.rasanen@runosydan.net
+	
+	Example:
+		$db = new CMySQL;
+		$db->connect( 'db_server', 'db_user', 
+			'db_password', '', 'db_name' );
+
+		$ret = $db->queryAndAssoc( 'SELECT * FROM test_table LIMIT 10' );
+		print_r( $ret );
+
