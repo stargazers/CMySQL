@@ -2,7 +2,7 @@
 
 	/* 
 	Class for using MySQL database with PHP.
-	Copyright (C) 2008, 2009 Aleksi Räsänen <aleksi.rasanen@runosydan.net>
+	Copyright (C) 2008, 2009, 2011 Aleksi Räsänen <aleksi.rasanen@runosydan.net>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -23,10 +23,10 @@
   //  CMySQL
   /*!
       @brief Class for MySQL databases
-
       @author Aleksi Räsänen
-              aleksi_rasanen@hotmail.com
-              2008
+	  @email aleksi.rasanen@runosydan.net
+	  @copyright Aleksi Räsänen, 2008-2011
+	  @license GNU AGPL
   */
   // ***********************************************  
   class CMySQL
@@ -50,15 +50,13 @@
     //***************************************************  
     //  __construct
     /*!
-	@brief Class constructor. If we give a file as a
-	       parameter, then we read configuration from
-	       that file and connect database directly.
-
-	@param $settingsFile Database settings. All settings
-	       must be in associative array $db where must
-	       exists keys server, username, password, port
-	       and database.
-
+		@brief Class constructor. If we give a file as a
+			   parameter, then we read configuration from
+			   that file and connect database directly.
+		@param $settingsFile Database settings. All settings
+		       must be in associative array $db where must
+			   exists keys server, username, password, port
+			   and database.
         @return Database connection
     */
     //***************************************************  
@@ -83,9 +81,7 @@
     //  query
     /*!
         @brief Execute query
-
         @param $query SQL query
-
         @return Last query results. On error we throw
                 an Exception.
     */
@@ -95,7 +91,7 @@
       // Execute query only if we have connected
       if( $this->_isConnected )
       {
-	// Save last query to class variable
+		// Save last query to class variable
         $this->_lastQuery = $query;
         
         // Execute query
@@ -105,10 +101,10 @@
         if( mysql_error() != '' )
           throw new Exception( 'MySQL error: ' . mysql_error() );
 
-	// Save query results to class variable
+		// Save query results to class variable
         $this->_lastResult = $ret;
 
-	// Get last insert ID
+		// Get last insert ID
         $this->lastInsertID = mysql_insert_id();
 
         // Return last query resultset
@@ -124,11 +120,10 @@
     // ***********************************************
     //  setConnection
     /*!
-	@brief Set connection. This can be used if
-	       we want to use already existing 
-	       database connection instead of creating
-	       new connection.
-
+		@brief Set connection. This can be used if
+			   we want to use already existing 
+			   database connection instead of creating
+			   new connection.
         @param $connection Database connection handle
     */
     // ***********************************************
@@ -143,7 +138,6 @@
     //  getConnection
     /*!
         @brief Return handle of a connection
-
         @return Connection handle
     */
     // ***********************************************
@@ -182,7 +176,6 @@
     //  getLastQuery
     /*!
         @brief Return last executed query
-
         @return Last executed query in string
     */
     // ***********************************************
@@ -196,7 +189,6 @@
     //  getLastResult
     /*!
         @brief Returns last resultset
-
         @return Results of last query in resultset
     */
     // ***********************************************
@@ -210,9 +202,7 @@
     //  fetchAssoc
     /*!
         @brief Create associative array from resultset
-
         @param $db_ret Resultset
-
         @return Associative array
     */
     // ***********************************************
@@ -244,17 +234,11 @@
     //  connect
     /*!
         @brief Connect to database server
-
         @param $server Database server
-
         @param $username Database username
-
         @param $password Database password
-
         @param [$port] Database port number
-
         @param [$database] Database to select
-
         @return Connection. If failed, throws an Exception.
     */
     // ***********************************************
@@ -294,7 +278,6 @@
     //  selectDatabase
     /*!
         @brief Select database to use
-
         @param $database Database what we want to use
     */
     // ***********************************************
@@ -315,7 +298,6 @@
     //  isConnected
     /*!
         @brief Tells if we are connected or not
-
         @return True if connected, otherwise false
     */
     // ***********************************************  
@@ -329,14 +311,12 @@
     //  numRows
     /*!
         @brief Get number of rows in resultset
-
-	@param [$db_ret] Query results where we want
-	       to read number of rows. If this is not
-	       given, then we use local variable
-	       where is stored last query results.
-	       If that is not found, then we throw
-	       an Exception.
-
+		@param [$db_ret] Query results where we want
+			   to read number of rows. If this is not
+			   given, then we use local variable
+			   where is stored last query results.
+			   If that is not found, then we throw
+			   an Exception.
         @return Number of rows
     */
     // ***********************************************  
@@ -348,8 +328,8 @@
       }
       else
       {
-	// If we have done query with this class,
-	// use last results.
+		// If we have done query with this class,
+		// use last results.
         if( $this->_lastResult != '' )
           return @mysql_num_rows( $this->_lastResult );
 
@@ -363,12 +343,9 @@
     // ***********************************************
     //  getLastInsertID
     /*!
-        @brief Return last ID value of last INSERT
-	       INTO-query.
-        
+        @brief Return last ID value of last INSERT INTO-query.
         @return ID-number. 0 if we have not created
-	        any INSERT INTO -queries with this
-		database connection.
+	        any INSERT INTO -queries with this database connection.
     */
     // ***********************************************
     public function getLastInsertID()
