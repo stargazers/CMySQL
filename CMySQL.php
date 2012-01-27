@@ -380,6 +380,22 @@
 			return -2;
 		}
 	}
+
+	// ************************************************** 
+	//  makeSafeForDb
+	/*!
+		@brief Escapes given string to be safe for database.
+		  In practice we use mysql_real_escape_string here, 
+		  but this method is for more easy swapping from CSQLite
+		  class to CMySQL if required.
+		@param $string String
+		@return Escaped string
+	*/
+	// ************************************************** 
+	public function makeSafeForDb( $string )
+	{
+		return mysql_real_escape_string( $string );
+	}
   }
 
 ?>
